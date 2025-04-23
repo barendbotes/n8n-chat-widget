@@ -1,0 +1,24 @@
+<!-- Widget Configuration -->
+<script>
+  window.ChatWidgetConfig = {
+    webhook: {
+      url: "<your n8n webhook URL>",
+      route: "general",
+    },
+    branding: {
+      logo: "<your company logo URL>",
+      name: "Botes Networks", // Your company name
+      welcomeText: "Hi 👋, how can we help?", //Welcome message
+      responseTimeText: "We typically respond right away", //Response time message
+    },
+    style: {
+      primaryColor: "#f78104", //Primary color
+      secondaryColor: "#304fff", //Secondary color
+      position: "right", //Position of the widget (left or right)
+      backgroundColor: "#f3f3f3", //Background color of the chat widget
+      fontColor: "#333333", //Text color for messages and interface
+    },
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/gh/barendbotes/n8n-chat-widget/chat-widget.js"></script>
+<!-- Widget Script -->

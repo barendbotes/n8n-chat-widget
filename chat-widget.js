@@ -3,11 +3,11 @@
   // Create and inject styles
   const styles = `
         .n8n-chat-widget {
-            --chat--color-primary: var(--n8n-chat-primary-color, #f78103);
-            --chat--color-secondary: var(--n8n-chat-secondary-color, #cc6900);
+            --chat--color-primary: var(--n8n-chat-primary-color, #f78104);
+            --chat--color-secondary: var(--n8n-chat-secondary-color, #304fff);
             --chat--color-background: var(--n8n-chat-background-color, #ffffff);
             --chat--color-font: var(--n8n-chat-font-color, #333333);
-            --chat--color-header: var(--n8n-chat-header-color, #ffffff); /* New variable for header */
+            --chat--color-header: var(--n8n-chat-header-color, #ffffff);
             font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
 
@@ -19,10 +19,10 @@
             display: none;
             width: 380px;
             height: 600px;
-            background: white; /* Forced to white */
+            background: white;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); /* Softer shadow */
-            border: 1px solid #e5e7eb; /* Light grey border */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
             overflow: hidden;
             font-family: inherit;
         }
@@ -42,9 +42,9 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #e5e7eb; /* Light grey border */
+            border-bottom: 1px solid #e5e7eb;
             position: relative;
-            background: var(--chat--color-header); /* Use new header color variable */
+            background: var(--chat--color-header);
         }
 
         .n8n-chat-widget .close-button {
@@ -106,7 +106,7 @@
             gap: 8px;
             width: 100%;
             padding: 16px 24px;
-            background: var(--chat--color-primary); /* MODIFIED: Solid color */
+            background: var(--chat--color-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -148,7 +148,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            background: white; /* MODIFIED: Forced to white */
+            background: white;
             display: flex;
             flex-direction: column;
         }
@@ -164,23 +164,23 @@
         }
 
         .n8n-chat-widget .chat-message.user {
-            background: var(--chat--color-primary); /* MODIFIED: Solid color */
+            background: var(--chat--color-primary);
             color: white;
             align-self: flex-end;
             border: none;
         }
 
         .n8n-chat-widget .chat-message.bot {
-            background: #f3f4f6; /* MODIFIED: Light grey for bot bubble */
-            border: 1px solid #e5e7eb; /* Light grey border */
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
             color: var(--chat--color-font);
             align-self: flex-start;
         }
 
         .n8n-chat-widget .chat-input {
             padding: 16px;
-            background: white; /* MODIFIED: Forced to white */
-            border-top: 1px solid #e5e7eb; /* Light grey border */
+            background: white;
+            border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 8px;
         }
@@ -188,7 +188,7 @@
         .n8n-chat-widget .chat-input textarea {
             flex: 1;
             padding: 12px;
-            border: 1px solid #d1d5db; /* Medium grey border */
+            border: 1px solid #d1d5db;
             border-radius: 8px;
             background: white;
             color: var(--chat--color-font);
@@ -203,7 +203,7 @@
         }
 
         .n8n-chat-widget .chat-input button {
-            background: var(--chat--color-primary); /* MODIFIED: Solid color */
+            background: var(--chat--color-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -225,11 +225,11 @@
             width: 60px;
             height: 60px;
             border-radius: 30px;
-            background: var(--chat--color-primary); /* MODIFIED: Solid color */
+            background: var(--chat--color-primary);
             color: white;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Softer shadow */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 999;
             transition: transform 0.3s;
             display: flex;
@@ -255,8 +255,8 @@
         .n8n-chat-widget .chat-footer {
             padding: 8px;
             text-align: center;
-            background: white; /* MODIFIED: Forced to white */
-            border-top: 1px solid #e5e7eb; /* Light grey border */
+            background: white;
+            border-top: 1px solid #e5e7eb;
         }
 
         .n8n-chat-widget .chat-footer a {
@@ -302,9 +302,9 @@
       },
     },
     style: {
-      primaryColor: "#f78104", // Default primary color
-      secondaryColor: "#304fff", // Default secondary color
-      headerColor: "#ffffff", // NEW: Default header color is white
+      primaryColor: "#f78104",
+      secondaryColor: "#304fff",
+      headerColor: "#ffffff",
       position: "right",
       backgroundColor: "#f3f3f3",
       fontColor: "#333333",
@@ -353,7 +353,6 @@
     "--n8n-chat-font-color",
     config.style.fontColor
   );
-  // Set the new header color variable
   widgetContainer.style.setProperty(
     "--n8n-chat-header-color",
     config.style.headerColor
@@ -425,7 +424,6 @@
     return crypto.randomUUID();
   }
 
-  // Helper function to display bot messages
   function displayBotMessage(text) {
     const botMessageDiv = document.createElement("div");
     botMessageDiv.className = "chat-message bot";
@@ -434,29 +432,50 @@
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
-  // Helper function to parse the response from the webhook
-  function parseWebhookResponse(responseData) {
-    // Case 1: The response is an array with an 'output' property
-    if (Array.isArray(responseData) && responseData[0] && responseData[0].output) {
-      return responseData[0].output;
+  // ====================================================================
+  // REWRITTEN RESPONSE PARSING LOGIC
+  // ====================================================================
+  function parseWebhookResponse(data) {
+    // Check if the data itself is a simple string
+    if (typeof data === 'string') {
+      return data;
     }
-    // Case 2: The response is an object with an 'output' property
-    if (responseData && typeof responseData === 'object' && responseData.output) {
-      return responseData.output;
+
+    // Check if the data is an object and has a 'text', 'message', or 'output' property
+    if (data && typeof data === 'object') {
+      if (typeof data.text === 'string') return data.text;
+      if (typeof data.message === 'string') return data.message;
+      if (typeof data.output === 'string') return data.output;
+
+      // Handle the specific case from your screenshot: {"response": "..."}
+      if (typeof data.response === 'string') {
+        // The 'response' value might be a stringified JSON itself. Let's try to parse it.
+        try {
+          const innerData = JSON.parse(data.response);
+          // After parsing, let's check again for common keys inside the nested object/array
+          if (Array.isArray(innerData) && innerData[0]) {
+            const firstItem = innerData[0];
+            if (typeof firstItem.text === 'string') return firstItem.text;
+            if (typeof firstItem.message === 'string') return firstItem.message;
+            if (typeof firstItem.output === 'string') return firstItem.output;
+          } else if (innerData && typeof innerData === 'object') {
+            if (typeof innerData.text === 'string') return innerData.text;
+            if (typeof innerData.message === 'string') return innerData.message;
+            if (typeof innerData.output === 'string') return innerData.output;
+          }
+        } catch (e) {
+          // It wasn't valid JSON, so it's probably just a plain text string.
+          return data.response;
+        }
+      }
     }
-    // Case 3: The response is a simple string
-    if (typeof responseData === 'string') {
-      return responseData;
-    }
-    // Case 4: The response is an object, but we don't know the key.
-    // Stringify it for debugging, but this indicates a webhook configuration issue.
-    if (responseData && typeof responseData === 'object') {
-      console.warn("Received an object response without an 'output' key. Displaying as JSON. Check webhook configuration.", responseData);
-      return JSON.stringify(responseData, null, 2);
-    }
-    // Fallback for unknown response types
+
+    // If we still haven't found a message, the format is unexpected.
+    // Log it for debugging and show a user-friendly error.
+    console.error("Could not find a valid message in the webhook response:", data);
     return "Sorry, I received a response I couldn't understand.";
   }
+  // ====================================================================
 
   async function startNewConversation() {
     currentSessionId = generateUUID();

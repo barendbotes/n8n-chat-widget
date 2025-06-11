@@ -17,6 +17,7 @@
             right: 20px;
             z-index: 1000;
             display: none;
+            flex-direction: column; /* This is now the main layout direction */
             width: 380px;
             height: 600px;
             background: white;
@@ -34,7 +35,6 @@
 
         .n8n-chat-widget .chat-container.open {
             display: flex;
-            flex-direction: column;
         }
 
         .n8n-chat-widget .brand-header {
@@ -45,6 +45,7 @@
             border-bottom: 1px solid #e5e7eb;
             position: relative;
             background: var(--chat--color-header);
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
 
         .n8n-chat-widget .close-button {
@@ -80,15 +81,23 @@
             color: var(--chat--color-font);
         }
 
+        /* Main content area that holds welcome/chat views */
+        .n8n-chat-widget .chat-main-content {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
         .n8n-chat-widget .new-conversation {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            display: flex; /* Show by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
             padding: 20px;
             text-align: center;
-            width: 100%;
-            max-width: 300px;
         }
 
         .n8n-chat-widget .welcome-text {
@@ -105,6 +114,7 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
+            max-width: 300px;
             padding: 16px 24px;
             background: var(--chat--color-primary);
             color: white;
@@ -135,7 +145,7 @@
         }
 
         .n8n-chat-widget .chat-interface {
-            display: none;
+            display: none; /* Hide by default */
             flex-direction: column;
             height: 100%;
         }
@@ -183,6 +193,7 @@
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 8px;
+            flex-shrink: 0; /* Prevent input from shrinking */
         }
 
         .n8n-chat-widget .chat-input textarea {
@@ -257,6 +268,7 @@
             text-align: center;
             background: white;
             border-top: 1px solid #e5e7eb;
+            flex-shrink: 0; /* Prevent footer from shrinking */
         }
 
         .n8n-chat-widget .chat-footer a {
@@ -363,43 +375,45 @@
     config.style.position === "left" ? " position-left" : ""
   }`;
 
-  const newConversationHTML = `
+  // ====================================================================
+  // RESTRUCTURED HTML INJECTION
+  // ====================================================================
+  const headerHTML = `
         <div class="brand-header">
             <img src="${config.branding.logo}" alt="${config.branding.name}">
             <span>${config.branding.name}</span>
             <button class="close-button">×</button>
         </div>
-        <div class="new-conversation">
-            <h2 class="welcome-text">${config.branding.welcomeText}</h2>
-            <button class="new-chat-btn">
-                <svg class="message-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
-                </svg>
-                Send us a message
-            </button>
-            <p class="response-text">${config.branding.responseTimeText}</p>
+    `;
+
+  const mainContentHTML = `
+        <div class="chat-main-content">
+            <div class="new-conversation">
+                <h2 class="welcome-text">${config.branding.welcomeText}</h2>
+                <button class="new-chat-btn">
+                    <svg class="message-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
+                    </svg>
+                    Send us a message
+                </button>
+                <p class="response-text">${config.branding.responseTimeText}</p>
+            </div>
+            <div class="chat-interface">
+                <div class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea placeholder="Type your message here..." rows="1"></textarea>
+                    <button type="submit">Send</button>
+                </div>
+                <div class="chat-footer">
+                    <a href="${config.branding.poweredBy.link}" target="_blank">${config.branding.poweredBy.text}</a>
+                </div>
+            </div>
         </div>
     `;
 
-  const chatInterfaceHTML = `
-        <div class="chat-interface">
-            <div class="brand-header">
-                <img src="${config.branding.logo}" alt="${config.branding.name}">
-                <span>${config.branding.name}</span>
-                <button class="close-button">×</button>
-            </div>
-            <div class="chat-messages"></div>
-            <div class="chat-input">
-                <textarea placeholder="Type your message here..." rows="1"></textarea>
-                <button type="submit">Send</button>
-            </div>
-            <div class="chat-footer">
-                <a href="${config.branding.poweredBy.link}" target="_blank">${config.branding.poweredBy.text}</a>
-            </div>
-        </div>
-    `;
-
-  chatContainer.innerHTML = newConversationHTML + chatInterfaceHTML;
+  // Inject the single header and the main content area
+  chatContainer.innerHTML = headerHTML + mainContentHTML;
+  // ====================================================================
 
   const toggleButton = document.createElement("button");
   toggleButton.className = `chat-toggle${
@@ -414,11 +428,13 @@
   widgetContainer.appendChild(toggleButton);
   document.body.appendChild(widgetContainer);
 
-  const newChatBtn = chatContainer.querySelector(".new-chat-btn");
+  // Update query selectors to find elements within the new structure
+  const newConversationView = chatContainer.querySelector(".new-conversation");
   const chatInterface = chatContainer.querySelector(".chat-interface");
-  const messagesContainer = chatContainer.querySelector(".chat-messages");
-  const textarea = chatContainer.querySelector("textarea");
-  const sendButton = chatContainer.querySelector('button[type="submit"]');
+  const newChatBtn = newConversationView.querySelector(".new-chat-btn");
+  const messagesContainer = chatInterface.querySelector(".chat-messages");
+  const textarea = chatInterface.querySelector("textarea");
+  const sendButton = chatInterface.querySelector('button[type="submit"]');
 
   function generateUUID() {
     return crypto.randomUUID();
@@ -432,50 +448,11 @@
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
-  // ====================================================================
-  // REWRITTEN RESPONSE PARSING LOGIC
-  // ====================================================================
   function parseWebhookResponse(data) {
-    // Check if the data itself is a simple string
-    if (typeof data === 'string') {
-      return data;
-    }
-
-    // Check if the data is an object and has a 'text', 'message', or 'output' property
-    if (data && typeof data === 'object') {
-      if (typeof data.text === 'string') return data.text;
-      if (typeof data.message === 'string') return data.message;
-      if (typeof data.output === 'string') return data.output;
-
-      // Handle the specific case from your screenshot: {"response": "..."}
-      if (typeof data.response === 'string') {
-        // The 'response' value might be a stringified JSON itself. Let's try to parse it.
-        try {
-          const innerData = JSON.parse(data.response);
-          // After parsing, let's check again for common keys inside the nested object/array
-          if (Array.isArray(innerData) && innerData[0]) {
-            const firstItem = innerData[0];
-            if (typeof firstItem.text === 'string') return firstItem.text;
-            if (typeof firstItem.message === 'string') return firstItem.message;
-            if (typeof firstItem.output === 'string') return firstItem.output;
-          } else if (innerData && typeof innerData === 'object') {
-            if (typeof innerData.text === 'string') return innerData.text;
-            if (typeof innerData.message === 'string') return innerData.message;
-            if (typeof innerData.output === 'string') return innerData.output;
-          }
-        } catch (e) {
-          // It wasn't valid JSON, so it's probably just a plain text string.
-          return data.response;
-        }
-      }
-    }
-
-    // If we still haven't found a message, the format is unexpected.
-    // Log it for debugging and show a user-friendly error.
-    console.error("Could not find a valid message in the webhook response:", data);
-    return "Sorry, I received a response I couldn't understand.";
+    // The simplest approach: stringify whatever is received.
+    // The `null, 2` part makes it nicely indented for readability.
+    return JSON.stringify(data, null, 2);
   }
-  // ====================================================================
 
   async function startNewConversation() {
     currentSessionId = generateUUID();
@@ -500,8 +477,10 @@
       });
 
       const responseData = await response.json();
-      chatContainer.querySelector(".new-conversation").style.display = "none";
-      chatInterface.classList.add("active");
+      
+      // MODIFIED: Hide the welcome view and show the chat interface
+      newConversationView.style.display = "none";
+      chatInterface.style.display = "flex"; // Use 'flex' as defined in CSS
 
       const messageText = parseWebhookResponse(responseData);
       displayBotMessage(messageText);

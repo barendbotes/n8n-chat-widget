@@ -17,6 +17,7 @@
             right: 20px;
             z-index: 1000;
             display: none;
+            flex-direction: column;
             width: 380px;
             height: 600px;
             background: white;
@@ -34,7 +35,6 @@
 
         .n8n-chat-widget .chat-container.open {
             display: flex;
-            flex-direction: column;
         }
 
         .n8n-chat-widget .brand-header {
@@ -45,6 +45,7 @@
             border-bottom: 1px solid #e5e7eb;
             position: relative;
             background: var(--chat--color-header);
+            flex-shrink: 0;
         }
 
         .n8n-chat-widget .close-button {
@@ -80,15 +81,22 @@
             color: var(--chat--color-font);
         }
 
+        .n8n-chat-widget .chat-main-content {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
         .n8n-chat-widget .new-conversation {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
             padding: 20px;
             text-align: center;
-            width: 100%;
-            max-width: 300px;
         }
 
         .n8n-chat-widget .welcome-text {
@@ -105,6 +113,7 @@
             justify-content: center;
             gap: 8px;
             width: 100%;
+            max-width: 300px;
             padding: 16px 24px;
             background: var(--chat--color-primary);
             color: white;
@@ -183,6 +192,7 @@
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .n8n-chat-widget .chat-input textarea {
@@ -257,6 +267,7 @@
             text-align: center;
             background: white;
             border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
         }
 
         .n8n-chat-widget .chat-footer a {
@@ -287,6 +298,7 @@
 
   // Default configuration
   const defaultConfig = {
+    loadPreviousSession: false, // MODIFIED: Added this with a default of false
     webhook: {
       url: "",
       route: "",
@@ -314,7 +326,9 @@
   // Merge user config with defaults
   const config = window.ChatWidgetConfig
     ? {
-        webhook: {
+        ...defaultConfig, // Start with defaults
+        ...window.ChatWidgetConfig, // User config overrides defaults
+        webhook: { // Deep merge nested objects
           ...defaultConfig.webhook,
           ...window.ChatWidgetConfig.webhook,
         },
@@ -322,7 +336,10 @@
           ...defaultConfig.branding,
           ...window.ChatWidgetConfig.branding,
         },
-        style: { ...defaultConfig.style, ...window.ChatWidgetConfig.style },
+        style: { 
+          ...defaultConfig.style, 
+          ...window.ChatWidgetConfig.style 
+        },
       }
     : defaultConfig;
 
@@ -363,43 +380,40 @@
     config.style.position === "left" ? " position-left" : ""
   }`;
 
-  const newConversationHTML = `
+  const headerHTML = `
         <div class="brand-header">
             <img src="${config.branding.logo}" alt="${config.branding.name}">
             <span>${config.branding.name}</span>
             <button class="close-button">×</button>
         </div>
-        <div class="new-conversation">
-            <h2 class="welcome-text">${config.branding.welcomeText}</h2>
-            <button class="new-chat-btn">
-                <svg class="message-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
-                </svg>
-                Send us a message
-            </button>
-            <p class="response-text">${config.branding.responseTimeText}</p>
+    `;
+
+  const mainContentHTML = `
+        <div class="chat-main-content">
+            <div class="new-conversation">
+                <h2 class="welcome-text">${config.branding.welcomeText}</h2>
+                <button class="new-chat-btn">
+                    <svg class="message-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
+                    </svg>
+                    Send us a message
+                </button>
+                <p class="response-text">${config.branding.responseTimeText}</p>
+            </div>
+            <div class="chat-interface">
+                <div class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea placeholder="Type your message here..." rows="1"></textarea>
+                    <button type="submit">Send</button>
+                </div>
+                <div class="chat-footer">
+                    <a href="${config.branding.poweredBy.link}" target="_blank">${config.branding.poweredBy.text}</a>
+                </div>
+            </div>
         </div>
     `;
 
-  const chatInterfaceHTML = `
-        <div class="chat-interface">
-            <div class="brand-header">
-                <img src="${config.branding.logo}" alt="${config.branding.name}">
-                <span>${config.branding.name}</span>
-                <button class="close-button">×</button>
-            </div>
-            <div class="chat-messages"></div>
-            <div class="chat-input">
-                <textarea placeholder="Type your message here..." rows="1"></textarea>
-                <button type="submit">Send</button>
-            </div>
-            <div class="chat-footer">
-                <a href="${config.branding.poweredBy.link}" target="_blank">${config.branding.poweredBy.text}</a>
-            </div>
-        </div>
-    `;
-
-  chatContainer.innerHTML = newConversationHTML + chatInterfaceHTML;
+  chatContainer.innerHTML = headerHTML + mainContentHTML;
 
   const toggleButton = document.createElement("button");
   toggleButton.className = `chat-toggle${
@@ -414,11 +428,12 @@
   widgetContainer.appendChild(toggleButton);
   document.body.appendChild(widgetContainer);
 
-  const newChatBtn = chatContainer.querySelector(".new-chat-btn");
+  const newConversationView = chatContainer.querySelector(".new-conversation");
   const chatInterface = chatContainer.querySelector(".chat-interface");
-  const messagesContainer = chatContainer.querySelector(".chat-messages");
-  const textarea = chatContainer.querySelector("textarea");
-  const sendButton = chatContainer.querySelector('button[type="submit"]');
+  const newChatBtn = newConversationView.querySelector(".new-chat-btn");
+  const messagesContainer = chatInterface.querySelector(".chat-messages");
+  const textarea = chatInterface.querySelector("textarea");
+  const sendButton = chatInterface.querySelector('button[type="submit"]');
 
   function generateUUID() {
     return crypto.randomUUID();
@@ -427,89 +442,62 @@
   function displayBotMessage(text) {
     const botMessageDiv = document.createElement("div");
     botMessageDiv.className = "chat-message bot";
-    botMessageDiv.textContent = text;
+    // Use <pre> tag to preserve formatting of stringified JSON
+    const pre = document.createElement('pre');
+    pre.style.margin = '0';
+    pre.style.whiteSpace = 'pre-wrap'; // Allows long lines to wrap
+    pre.style.wordBreak = 'break-all'; // Breaks long strings
+    pre.textContent = text;
+    botMessageDiv.appendChild(pre);
+    
     messagesContainer.appendChild(botMessageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
   // ====================================================================
-  // REWRITTEN RESPONSE PARSING LOGIC
+  // SIMPLIFIED RESPONSE HANDLING
   // ====================================================================
-  function parseWebhookResponse(data) {
-    // Check if the data itself is a simple string
-    if (typeof data === 'string') {
-      return data;
+  function parseWebhookResponse(responseData) {
+    // If the response is already a string, return it directly.
+    if (typeof responseData === 'string') {
+      return responseData;
     }
-
-    // Check if the data is an object and has a 'text', 'message', or 'output' property
-    if (data && typeof data === 'object') {
-      if (typeof data.text === 'string') return data.text;
-      if (typeof data.message === 'string') return data.message;
-      if (typeof data.output === 'string') return data.output;
-
-      // Handle the specific case from your screenshot: {"response": "..."}
-      if (typeof data.response === 'string') {
-        // The 'response' value might be a stringified JSON itself. Let's try to parse it.
-        try {
-          const innerData = JSON.parse(data.response);
-          // After parsing, let's check again for common keys inside the nested object/array
-          if (Array.isArray(innerData) && innerData[0]) {
-            const firstItem = innerData[0];
-            if (typeof firstItem.text === 'string') return firstItem.text;
-            if (typeof firstItem.message === 'string') return firstItem.message;
-            if (typeof firstItem.output === 'string') return firstItem.output;
-          } else if (innerData && typeof innerData === 'object') {
-            if (typeof innerData.text === 'string') return innerData.text;
-            if (typeof innerData.message === 'string') return innerData.message;
-            if (typeof innerData.output === 'string') return innerData.output;
-          }
-        } catch (e) {
-          // It wasn't valid JSON, so it's probably just a plain text string.
-          return data.response;
-        }
-      }
-    }
-
-    // If we still haven't found a message, the format is unexpected.
-    // Log it for debugging and show a user-friendly error.
-    console.error("Could not find a valid message in the webhook response:", data);
-    return "Sorry, I received a response I couldn't understand.";
+    // Otherwise, stringify the entire object to display it for debugging.
+    // The `null, 2` part makes it nicely indented.
+    return JSON.stringify(responseData, null, 2);
   }
   // ====================================================================
 
   async function startNewConversation() {
     currentSessionId = generateUUID();
-    const data = [
-      {
+    
+    // MODIFIED: Respect the loadPreviousSession config setting
+    if (config.loadPreviousSession) {
+      const data = [{
         action: "loadPreviousSession",
         sessionId: currentSessionId,
         route: config.webhook.route,
-        metadata: {
-          userId: "",
-        },
-      },
-    ];
+        metadata: { userId: "" },
+      }];
 
-    try {
-      const response = await fetch(config.webhook.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const responseData = await response.json();
-      chatContainer.querySelector(".new-conversation").style.display = "none";
-      chatInterface.classList.add("active");
-
-      const messageText = parseWebhookResponse(responseData);
-      displayBotMessage(messageText);
-
-    } catch (error) {
-      console.error("Error starting conversation:", error);
-      displayBotMessage("Sorry, I couldn't connect. Please try again later.");
+      try {
+        const response = await fetch(config.webhook.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const responseData = await response.json();
+        const messageText = parseWebhookResponse(responseData);
+        displayBotMessage(messageText);
+      } catch (error) {
+        console.error("Error loading previous session:", error);
+        displayBotMessage("Sorry, I couldn't connect. Please try again later.");
+      }
     }
+    
+    // This part now runs regardless of the config, to switch the view
+    newConversationView.style.display = "none";
+    chatInterface.style.display = "flex";
   }
 
   async function sendMessage(message) {
@@ -518,9 +506,7 @@
       sessionId: currentSessionId,
       route: config.webhook.route,
       chatInput: message,
-      metadata: {
-        userId: "",
-      },
+      metadata: { userId: "" },
     };
 
     const userMessageDiv = document.createElement("div");
@@ -532,9 +518,7 @@
     try {
       const response = await fetch(config.webhook.url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(messageData),
       });
 
@@ -573,7 +557,6 @@
     chatContainer.classList.toggle("open");
   });
 
-  // Add close button handlers
   const closeButtons = chatContainer.querySelectorAll(".close-button");
   closeButtons.forEach((button) => {
     button.addEventListener("click", () => {
